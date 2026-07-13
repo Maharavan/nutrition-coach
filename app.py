@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api import router
 def create_app() -> FastAPI:
     """Define the FastAPI application."""
-    app = FastAPI(name="AI Nutrition Coach", version="1.0.0", description="An AI-powered nutrition coaching application.")
+    app = FastAPI(title="AI Nutrition Coach", version="1.0.0", description="An AI-powered nutrition coaching application.")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

@@ -32,6 +32,15 @@ class Goal(str, Enum):
             Goal.GAIN_WEIGHT: 500
         }[self]
 
+    @property
+    def macro_split(self) -> tuple[float, float, float]:
+        """Return the (protein_ratio, carb_ratio, fat_ratio) split associated with each goal."""
+        return {
+            Goal.LOSE_WEIGHT: (0.30, 0.45, 0.25),
+            Goal.MAINTAIN_WEIGHT: (0.25, 0.45, 0.30),
+            Goal.GAIN_WEIGHT: (0.25, 0.45, 0.30),
+        }[self]
+
 class Sex(str, Enum):
     """Enumeration representing the sex of the user.""" 
     MALE = "male"
