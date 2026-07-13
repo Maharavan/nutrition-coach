@@ -38,7 +38,7 @@ class TavilyService():
                     content=item.get("content", ""),
                 )
                 for item in results.get("results", [])
-            ]
+            ]  
         except Exception as e:
             logger.exception('Unexpected error %s', str(e))
             search_results = []

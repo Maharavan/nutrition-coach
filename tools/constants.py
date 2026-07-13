@@ -1,4 +1,6 @@
+from __future__ import annotations
 from enum import Enum
+from typing import Tuple
 
 class ActivityLevel(str, Enum):
     """Enumeration representing different activity levels."""
@@ -50,3 +52,25 @@ class UnitSystem(str, Enum):
     """Enumeration representing the unit system for measurements."""
     METRIC = "metric"
     IMPERIAL = "imperial"
+
+class ExerciseType(str, Enum):
+    """Enumeration representing different exercise types."""
+    WALKING = "walking"
+    BRISK_WALKING = "brisk walking"
+    RUNNING = "running"
+    CYCLING = "cycling"
+    SWIMMING = "swimming"
+    YOGA = "yoga"
+    STRENGTH_TRAINING = "strength training"
+    @property
+    def met(self) -> float:
+        """Return the MET (Metabolic Equivalent of Task) value associated with this exercise type."""
+        return {
+            ExerciseType.WALKING: 3.5,
+            ExerciseType.BRISK_WALKING: 4.3,
+            ExerciseType.RUNNING: 8.3,
+            ExerciseType.CYCLING: 8.0,
+            ExerciseType.SWIMMING: 6.0,
+            ExerciseType.YOGA: 2.5,
+            ExerciseType.STRENGTH_TRAINING: 6.0,
+        }[self]

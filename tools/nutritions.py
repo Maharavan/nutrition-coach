@@ -1,53 +1,23 @@
 """Nutritions module for handling nutritional data and calculations."""
-from typing import List
 
-from pydantic import BaseModel, Field
 from strands import tool
 
 from services.llm_service import llm_service
 from services.tavily_service import tavily_service, SearchResult
-
-# --------------------------------------------------------------------------
-# Response models
-# --------------------------------------------------------------------------
-
-
-class NutritionInfoResponse(BaseModel):
-    """Nutritional information for a food."""
-
-    food_name: str = Field(..., description="The food that was looked up")
-    info: str = Field(..., description="Nutritional information including calories and macronutrients")
-
-
-class MealAnalysisResponse(BaseModel):
-    """Nutritional analysis of a meal."""
-
-    analysis: str = Field(..., description="Estimated calories, macronutrients, and feedback for the meal")
-
-
-class MealPlanResponse(BaseModel):
-    """A personalized meal plan."""
-
-    meal_plan: str = Field(..., description="The generated meal plan")
-
-
-class RecipeResponse(BaseModel):
-    """A healthy recipe recommendation."""
-
-    recipe: str = Field(..., description="Ingredients, preparation steps, and estimated nutrition")
-
-
-class FoodSwapResponse(BaseModel):
-    """Healthier alternatives for a food."""
-
-    suggestions: str = Field(..., description="Recommended healthier alternatives")
-
-
-class NutritionResearchResponse(BaseModel):
-    """Answer to a nutrition research question."""
-
-    answer: str = Field(..., description="Answer synthesized from research")
-    sources: List[SearchResult] = Field(default_factory=list, description="Sources used to answer the question")
+from tools.models import (
+    FoodNutritionRequest,
+    FoodSwapRequest,
+    FoodSwapResponse,
+    MealAnalysisRequest,
+    MealAnalysisResponse,
+    MealPlanRequest,
+    MealPlanResponse,
+    NutritionInfoResponse,
+    NutritionResearchRequest,
+    NutritionResearchResponse,
+    RecipeRequest,
+    RecipeResponse,
+)
 
 
 def _build_search_context(results: list[SearchResult]) -> str:
@@ -72,18 +42,18 @@ def _build_search_context(results: list[SearchResult]) -> str:
 
 
 @tool
-def lookup_food_nutrition(food_name: str) -> NutritionInfoResponse:
+def lookup_food_nutrition(request: FoodNutritionRequest) -> NutritionInfoResponse:
     """Retrieve nutritional information for a food."""
-    search_response = tavily_service.search(query=f"Nutritional information for {food_name}")
+    search_response = tavily_service.search(query=f"Nutritional information for {request.food_name}")
     results = search_response.results or []
     if not results:
         return NutritionInfoResponse(
-            food_name=food_name,
+            food_name=request.food_name,
             info="No reliable nutritional information was found."
         )
-    
+
     context = _build_search_context(results)
-    
+
     system_prompt = (
         "You are a nutrition expert. Provide accurate nutritional "
         "information including calories, protein, carbohydrates, fat, "
@@ -91,11 +61,11 @@ def lookup_food_nutrition(food_name: str) -> NutritionInfoResponse:
     )
 
     response = llm_service.generate(system_prompt=system_prompt, user_prompt=context)
-    return NutritionInfoResponse(food_name=food_name, info=response.content)
+    return NutritionInfoResponse(food_name=request.food_name, info=response.content)
 
 
 @tool
-def analyze_meal(meal: str) -> MealAnalysisResponse:
+def analyze_meal(request: MealAnalysisRequest) -> MealAnalysisResponse:
     """Analyze a meal and provide nutritional feedback."""
     system_prompt = (
         "You are a nutrition expert. Analyze the meal, estimate calories "
@@ -103,12 +73,12 @@ def analyze_meal(meal: str) -> MealAnalysisResponse:
         "suggest practical improvements."
     )
 
-    response = llm_service.generate(system_prompt=system_prompt, user_prompt=meal)
+    response = llm_service.generate(system_prompt=system_prompt, user_prompt=request.meal)
     return MealAnalysisResponse(analysis=response.content)
 
 
 @tool
-def generate_meal_plan(requirements: str) -> MealPlanResponse:
+def generate_meal_plan(request: MealPlanRequest) -> MealPlanResponse:
     """Generate a personalized meal plan."""
     system_prompt = (
         "You are a registered dietitian. Generate a personalized meal "
@@ -116,48 +86,48 @@ def generate_meal_plan(requirements: str) -> MealPlanResponse:
         "preferences, allergies, and lifestyle."
     )
 
-    response = llm_service.generate(system_prompt=system_prompt, user_prompt=requirements)
+    response = llm_service.generate(system_prompt=system_prompt, user_prompt=request.requirements)
     return MealPlanResponse(meal_plan=response.content)
 
 
 @tool
-def recommend_recipe(request: str) -> RecipeResponse:
+def recommend_recipe(request: RecipeRequest) -> RecipeResponse:
     """Generate a healthy recipe."""
     system_prompt = (
         "You are a healthy recipe assistant. Create a nutritious recipe "
         "with ingredients, preparation steps, and estimated nutrition."
     )
 
-    response = llm_service.generate(system_prompt=system_prompt, user_prompt=request)
+    response = llm_service.generate(system_prompt=system_prompt, user_prompt=request.request)
     return RecipeResponse(recipe=response.content)
 
 
 @tool
-def recommend_food_swap(food: str) -> FoodSwapResponse:
+def recommend_food_swap(request: FoodSwapRequest) -> FoodSwapResponse:
     """Recommend healthier alternatives for a food."""
     system_prompt = (
         "You are a nutrition coach. Recommend healthier alternatives "
         "while keeping similar taste, convenience, and nutritional value."
     )
 
-    response = llm_service.generate(system_prompt=system_prompt, user_prompt=food)
+    response = llm_service.generate(system_prompt=system_prompt, user_prompt=request.food)
     return FoodSwapResponse(suggestions=response.content)
 
 
 @tool
-def nutrition_research(question: str) -> NutritionResearchResponse:
+def nutrition_research(request: NutritionResearchRequest) -> NutritionResearchResponse:
     """Answer nutrition questions using web research."""
-    search_response = tavily_service.search(question)
+    search_response = tavily_service.search(request.question)
 
     results = search_response.results or []
     if results:
         research_context = _build_search_context(results=results)
         user_prompt = (
-            f"Question: {question}\n\n"
+            f"Question: {request.question}\n\n"
             f"Use the following research to answer:\n\n{research_context}"
         )
     else:
-        user_prompt = question
+        user_prompt = request.question
 
     system_prompt = (
         "You are a nutrition research assistant. Answer using reliable "

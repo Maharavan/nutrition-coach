@@ -1,103 +1,22 @@
 """Body composition and energy expenditure calculation tools."""
 
-from pydantic import BaseModel, Field
 from strands import tool
 
-from tools.constants import ActivityLevel, Goal, Sex, UnitSystem
-
-# --------------------------------------------------------------------------
-# Request / response models
-# --------------------------------------------------------------------------
-
-
-class BodyMeasurementRequest(BaseModel):
-    """Base request for calculations that require weight and a unit system."""
-
-    weight: float = Field(..., gt=0, description="Weight of the user in kilograms or pounds")
-    unit: UnitSystem = Field(..., description="Unit system for weight and height: 'metric' or 'imperial'")
-
-
-class BMIRequest(BodyMeasurementRequest):
-    """Request for a BMI calculation."""
-
-    height: float = Field(..., gt=0, description="Height of the user in meters or inches")
-
-
-class BMIResponse(BaseModel):
-    """Result of a BMI calculation."""
-
-    bmi: float = Field(..., description="Calculated Body Mass Index (BMI)")
-    category: str = Field(..., description="BMI category based on the calculated BMI value")
-
-
-class BMRRequest(BodyMeasurementRequest):
-    """Request for a BMR calculation."""
-
-    height: float = Field(..., gt=0, description="Height of the user in centimeters or inches")
-    age: int = Field(..., gt=0, description="Age of the user in years")
-    sex: Sex = Field(..., description="Sex of the user: 'male' or 'female'")
-
-
-class BMRResponse(BaseModel):
-    """Result of a BMR calculation."""
-
-    bmr: float = Field(..., description="Calculated Basal Metabolic Rate (BMR)")
-
-
-class TDEERequest(BaseModel):
-    """Request for a TDEE calculation."""
-
-    bmr: float = Field(..., gt=0, description="Basal Metabolic Rate (BMR) of the user")
-    activity_level: ActivityLevel = Field(..., description="Activity level of the user")
-
-
-class TDEEResponse(BaseModel):
-    """Result of a TDEE calculation."""
-
-    tdee: float = Field(..., description="Calculated Total Daily Energy Expenditure (TDEE)")
-
-
-class TargetCaloriesRequest(BaseModel):
-    """Request for a target daily caloric intake calculation."""
-
-    tdee: float = Field(..., gt=0, description="Total Daily Energy Expenditure (TDEE) of the user")
-    goal: Goal = Field(..., description="User's goal: 'lose weight', 'maintain weight', or 'gain weight'")
-
-
-class TargetCaloriesResponse(BaseModel):
-    """Result of a target daily caloric intake calculation."""
-
-    target_calories: float = Field(..., description="Calculated target daily caloric intake")
-
-
-class MacroNutrientRequest(BaseModel):
-    """Request for a macronutrient distribution calculation."""
-
-    target_calories: float = Field(..., gt=0, description="Target daily caloric intake")
-    goal: Goal = Field(..., description="User's goal: 'lose weight', 'maintain weight', or 'gain weight'")
-
-
-class MacroNutrientResponse(BaseModel):
-    """Result of a macronutrient distribution calculation."""
-
-    protein: float = Field(..., description="Calculated protein intake in grams")
-    fat: float = Field(..., description="Calculated fat intake in grams")
-    carbs: float = Field(..., description="Calculated carbohydrate intake in grams")
-
-
-class IdealWeightRequest(BaseModel):
-    """Request for an ideal body weight calculation."""
-
-    height: float = Field(..., gt=0, description="Height of the user in centimeters or inches")
-    sex: Sex = Field(..., description="Sex of the user: 'male' or 'female'")
-    unit: UnitSystem = Field(..., description="Unit system for height: 'metric' or 'imperial'")
-
-
-class IdealWeightResponse(BaseModel):
-    """Result of an ideal body weight calculation."""
-
-    ideal_weight: float = Field(..., description="Ideal body weight in kilograms, per the Devine formula")
-
+from tools.constants import Sex, UnitSystem
+from tools.models import (
+    BMIRequest,
+    BMIResponse,
+    BMRRequest,
+    BMRResponse,
+    IdealWeightRequest,
+    IdealWeightResponse,
+    MacroNutrientRequest,
+    MacroNutrientResponse,
+    TargetCaloriesRequest,
+    TargetCaloriesResponse,
+    TDEERequest,
+    TDEEResponse,
+)
 
 # --------------------------------------------------------------------------
 # Unit conversion helpers
