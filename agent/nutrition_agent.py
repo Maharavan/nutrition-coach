@@ -2,6 +2,7 @@ from pathlib import Path
 
 from strands.agent import Agent
 from config import nutrition_config
+from strands.memory import MemoryManager
 from api.models import AgentResponse
 import logging
 

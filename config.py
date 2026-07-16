@@ -40,7 +40,7 @@ class NutritionAgentConfig(BaseSettings):
     """Settings and helpers for the nutrition agent's API models."""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
-
+    MEM0_API_KEY: SecretStr
     API_KEY: SecretStr
     AGENT_MODEL_NAME: str = Field(
         default="gpt-4o",

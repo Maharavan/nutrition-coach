@@ -1,9 +1,9 @@
 """Nutritions module for handling nutritional data and calculations."""
 
-from strands import tool
+from strands import tool, ToolContext
 
 from services.llm_service import llm_service
-from services.tavily_service import tavily_service, SearchResult
+from services.tavily_service import tavily_service
 from tools.models import (
     FoodNutritionRequest,
     FoodSwapRequest,
@@ -19,40 +19,21 @@ from tools.models import (
     RecipeResponse,
 )
 
-
-def _build_search_context(results: list[SearchResult]) -> str:
-    """Build a formatted context string from search results.
-    
-    Args:
-        results: List of search results to format.
-        
-    Returns:
-        Formatted string combining all search results.
-    """
-    return "\n\n".join(
-        f"Source: {result.title}\n"
-        f"URL: {result.url}\n"
-        f"{result.content}"
-        for result in results
-    )
-
 # --------------------------------------------------------------------------
 # Tools
 # --------------------------------------------------------------------------
 
 
-@tool
-def lookup_food_nutrition(request: FoodNutritionRequest) -> NutritionInfoResponse:
+@tool(context=True)
+def lookup_food_nutrition(request: FoodNutritionRequest, tool_context: ToolContext) -> NutritionInfoResponse:
     """Retrieve nutritional information for a food."""
     search_response = tavily_service.search(query=f"Nutritional information for {request.food_name}")
-    results = search_response.results or []
-    if not results:
+    context = search_response.results
+    if not context:
         return NutritionInfoResponse(
             food_name=request.food_name,
             info="No reliable nutritional information was found."
         )
-
-    context = _build_search_context(results)
 
     system_prompt = (
         "You are a nutrition expert. Provide accurate nutritional "
@@ -64,8 +45,8 @@ def lookup_food_nutrition(request: FoodNutritionRequest) -> NutritionInfoRespons
     return NutritionInfoResponse(food_name=request.food_name, info=response.content)
 
 
-@tool
-def analyze_meal(request: MealAnalysisRequest) -> MealAnalysisResponse:
+@tool(context=True)
+def analyze_meal(request: MealAnalysisRequest, tool_context: ToolContext) -> MealAnalysisResponse:
     """Analyze a meal and provide nutritional feedback."""
     system_prompt = (
         "You are a nutrition expert. Analyze the meal, estimate calories "
@@ -77,8 +58,8 @@ def analyze_meal(request: MealAnalysisRequest) -> MealAnalysisResponse:
     return MealAnalysisResponse(analysis=response.content)
 
 
-@tool
-def generate_meal_plan(request: MealPlanRequest) -> MealPlanResponse:
+@tool(context=True)
+def generate_meal_plan(request: MealPlanRequest, tool_context: ToolContext) -> MealPlanResponse:
     """Generate a personalized meal plan."""
     system_prompt = (
         "You are a registered dietitian. Generate a personalized meal "
@@ -90,8 +71,8 @@ def generate_meal_plan(request: MealPlanRequest) -> MealPlanResponse:
     return MealPlanResponse(meal_plan=response.content)
 
 
-@tool
-def recommend_recipe(request: RecipeRequest) -> RecipeResponse:
+@tool(context=True)
+def recommend_recipe(request: RecipeRequest, tool_context: ToolContext) -> RecipeResponse:
     """Generate a healthy recipe."""
     system_prompt = (
         "You are a healthy recipe assistant. Create a nutritious recipe "
@@ -102,8 +83,8 @@ def recommend_recipe(request: RecipeRequest) -> RecipeResponse:
     return RecipeResponse(recipe=response.content)
 
 
-@tool
-def recommend_food_swap(request: FoodSwapRequest) -> FoodSwapResponse:
+@tool(context=True)
+def recommend_food_swap(request: FoodSwapRequest, tool_context: ToolContext) -> FoodSwapResponse:
     """Recommend healthier alternatives for a food."""
     system_prompt = (
         "You are a nutrition coach. Recommend healthier alternatives "
@@ -114,17 +95,15 @@ def recommend_food_swap(request: FoodSwapRequest) -> FoodSwapResponse:
     return FoodSwapResponse(suggestions=response.content)
 
 
-@tool
-def nutrition_research(request: NutritionResearchRequest) -> NutritionResearchResponse:
+@tool(context=True)
+def nutrition_research(request: NutritionResearchRequest, tool_context: ToolContext) -> NutritionResearchResponse:
     """Answer nutrition questions using web research."""
     search_response = tavily_service.search(request.question)
 
-    results = search_response.results or []
-    if results:
-        research_context = _build_search_context(results=results)
+    if search_response.results:
         user_prompt = (
             f"Question: {request.question}\n\n"
-            f"Use the following research to answer:\n\n{research_context}"
+            f"Use the following research to answer:\n\n{search_response.results}"
         )
     else:
         user_prompt = request.question
@@ -136,4 +115,4 @@ def nutrition_research(request: NutritionResearchRequest) -> NutritionResearchRe
     )
 
     response = llm_service.generate(system_prompt=system_prompt, user_prompt=user_prompt)
-    return NutritionResearchResponse(answer=response.content, sources=results)
+    return NutritionResearchResponse(answer=response.content)

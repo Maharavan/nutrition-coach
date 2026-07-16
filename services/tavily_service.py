@@ -1,4 +1,3 @@
-from typing import List
 import logging
 from pydantic import BaseModel, Field
 
@@ -17,7 +16,7 @@ class SearchResult(BaseModel):
 class TavilySearchResponse(BaseModel):
     """Result of a Tavily search query."""
     query: str = Field(..., description="The query that was searched")
-    results: List[SearchResult] = Field(default_factory=list, description="Normalized search results")
+    results: str = Field(..., description="Formatted search-result context, ready to use as LLM input")
 
 
 class TavilyService():
@@ -28,21 +27,39 @@ class TavilyService():
         self._client = TavilyClient(api_key=nutrition_config.TAVILY_API_KEY.get_secret_value())
 
     def search(self, query: str, max_results: int = 5) -> TavilySearchResponse:
-        """Search Tavily for the given query and return normalized results."""
+        """Search Tavily for the given query and return a formatted context string."""
         try:
-            results = self._client.search(query=query, max_results=max_results)
+            response = self._client.search(query=query, max_results=max_results)
             search_results = [
                 SearchResult(
                     title=item.get("title", ""),
                     url=item.get("url", ""),
                     content=item.get("content", ""),
                 )
-                for item in results.get("results", [])
-            ]  
+                for item in response.get("results", [])
+            ]
+            context = self.build_search_context(results=search_results)
         except Exception as e:
             logger.exception('Unexpected error %s', str(e))
-            search_results = []
+            context = ""
 
-        return TavilySearchResponse(query=query, results=search_results)
+        return TavilySearchResponse(query=query, results=context)
+    
+    def build_search_context(self, results: list[SearchResult]) -> str:
+        """Build a formatted context string from search results.
+
+        Args:
+            results: List of search results to format.
+
+        Returns:
+            Formatted string combining all search results.
+        """
+        return "\n\n".join(
+            f"Source: {result.title}\n"
+            f"URL: {result.url}\n"
+            f"{result.content}"
+            for result in results
+        )
+
 
 tavily_service = TavilyService()

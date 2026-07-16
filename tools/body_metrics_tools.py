@@ -1,6 +1,6 @@
 """Body composition and energy expenditure calculation tools."""
 
-from strands import tool
+from strands import tool, ToolContext
 
 from tools.constants import Sex, UnitSystem
 from tools.models import (
@@ -59,8 +59,8 @@ def _bmi_category(bmi: float) -> str:
 # --------------------------------------------------------------------------
 
 
-@tool
-def calculate_bmr(request: BMRRequest) -> BMRResponse:
+@tool(context=True)
+def calculate_bmr(request: BMRRequest, tool_context: ToolContext) -> BMRResponse:
     """
     Calculate Basal Metabolic Rate (BMR) using the Mifflin-St Jeor Equation.
 
@@ -85,8 +85,8 @@ def calculate_bmr(request: BMRRequest) -> BMRResponse:
     return BMRResponse(bmr=round(bmr, 1))
 
 
-@tool
-def calculate_bmi(request: BMIRequest) -> BMIResponse:
+@tool(context=True)
+def calculate_bmi(request: BMIRequest, tool_context: ToolContext) -> BMIResponse:
     """
     Calculate BMI and determine its category.
 
@@ -107,8 +107,8 @@ def calculate_bmi(request: BMIRequest) -> BMIResponse:
     return BMIResponse(bmi=round(bmi, 1), category=_bmi_category(bmi))
 
 
-@tool
-def calculate_tdee(request: TDEERequest) -> TDEEResponse:
+@tool(context=True)
+def calculate_tdee(request: TDEERequest, tool_context: ToolContext) -> TDEEResponse:
     """
     Calculate Total Daily Energy Expenditure (TDEE).
 
@@ -122,8 +122,8 @@ def calculate_tdee(request: TDEERequest) -> TDEEResponse:
     return TDEEResponse(tdee=round(tdee, 1))
 
 
-@tool
-def calculate_target_calories(request: TargetCaloriesRequest) -> TargetCaloriesResponse:
+@tool(context=True)
+def calculate_target_calories(request: TargetCaloriesRequest, tool_context: ToolContext) -> TargetCaloriesResponse:
     """
     Calculate target daily caloric intake based on TDEE and user goal.
 
@@ -137,8 +137,8 @@ def calculate_target_calories(request: TargetCaloriesRequest) -> TargetCaloriesR
     return TargetCaloriesResponse(target_calories=round(target_calories, 1))
 
 
-@tool
-def calculate_macros(request: MacroNutrientRequest) -> MacroNutrientResponse:
+@tool(context=True)
+def calculate_macros(request: MacroNutrientRequest, tool_context: ToolContext) -> MacroNutrientResponse:
     """
     Calculate macronutrient distribution based on target calories and user goal.
 
@@ -161,8 +161,8 @@ def calculate_macros(request: MacroNutrientRequest) -> MacroNutrientResponse:
     )
 
 
-@tool
-def calculate_ideal_weight(request: IdealWeightRequest) -> IdealWeightResponse:
+@tool(context=True)
+def calculate_ideal_weight(request: IdealWeightRequest, tool_context: ToolContext) -> IdealWeightResponse:
     """
     Calculate ideal body weight using the Devine formula.
 

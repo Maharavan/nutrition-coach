@@ -1,7 +1,7 @@
-from strands import tool
+from strands import tool, ToolContext
 
 from services.llm_service import llm_service
-from tools.body_metrics import _lbs_to_kg
+from tools.body_metrics_tools import _lbs_to_kg
 from tools.constants import UnitSystem
 from tools.models import (
     CaloriesBurnedRequest,
@@ -15,8 +15,8 @@ from tools.models import (
 )
 
 
-@tool
-def estimate_calories_burned(request: CaloriesBurnedRequest) -> CaloriesBurnedResponse:
+@tool(context=True)
+def estimate_calories_burned(request: CaloriesBurnedRequest, tool_context: ToolContext) -> CaloriesBurnedResponse:
     """
     Estimate calories burned during an activity using the MET formula.
 
@@ -31,8 +31,8 @@ def estimate_calories_burned(request: CaloriesBurnedRequest) -> CaloriesBurnedRe
 
     return CaloriesBurnedResponse(calories_burned=round(calories_burned, 1))
 
-@tool
-def recommend_workout(request: WorkoutRequest) -> WorkoutResponse:
+@tool(context=True)
+def recommend_workout(request: WorkoutRequest, tool_context: ToolContext) -> WorkoutResponse:
     """Generate a personalized workout recommendation."""
     system_prompt = (
         "You are a certified fitness coach. Design a workout based on the "
@@ -44,8 +44,10 @@ def recommend_workout(request: WorkoutRequest) -> WorkoutResponse:
     return WorkoutResponse(workout_plan=response.content)
 
 
-@tool
-def recommend_exercise(request: ExerciseRecommendationRequest) -> ExerciseRecommendationResponse:
+@tool(context=True)
+def recommend_exercise(
+    request: ExerciseRecommendationRequest, tool_context: ToolContext
+) -> ExerciseRecommendationResponse:
     """Recommend an exercise for a target muscle group or goal."""
     system_prompt = (
         "You are a certified fitness coach. Recommend a suitable exercise "
@@ -57,8 +59,8 @@ def recommend_exercise(request: ExerciseRecommendationRequest) -> ExerciseRecomm
     return ExerciseRecommendationResponse(recommendation=response.content)
 
 
-@tool
-def recommend_recovery_plan(request: RecoveryPlanRequest) -> RecoveryPlanResponse:
+@tool(context=True)
+def recommend_recovery_plan(request: RecoveryPlanRequest, tool_context: ToolContext) -> RecoveryPlanResponse:
     """Generate a personalized post-workout recovery plan."""
     system_prompt = (
         "You are a sports recovery specialist. Based on the workout "

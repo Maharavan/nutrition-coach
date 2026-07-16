@@ -1,10 +1,7 @@
 """Pydantic request/response models for the tools package."""
 
-from typing import List
-
 from pydantic import BaseModel, Field
 
-from services.tavily_service import SearchResult
 from tools.constants import ActivityLevel, ExerciseType, Goal, Sex, UnitSystem
 
 # --------------------------------------------------------------------------
@@ -237,4 +234,65 @@ class NutritionResearchResponse(BaseModel):
     """Answer to a nutrition research question."""
 
     answer: str = Field(..., description="Answer synthesized from research")
-    sources: List[SearchResult] = Field(default_factory=list, description="Sources used to answer the question")
+
+
+# --------------------------------------------------------------------------
+# Health research models
+# --------------------------------------------------------------------------
+
+
+class HealthResearchRequest(BaseModel):
+    """Request to research a health question."""
+
+    question: str = Field(..., description="Health-related question to research")
+
+
+class HealthResearchResponse(BaseModel):
+    """Answer to a health research question."""
+
+    answer: str = Field(..., description="Answer synthesized from research")
+
+
+class FactCheckRequest(BaseModel):
+    """Request to fact-check a health claim."""
+
+    claim: str = Field(..., description="Health claim to verify")
+
+
+class FactCheckResponse(BaseModel):
+    """Result of fact-checking a health claim."""
+
+    verdict: str = Field(..., description="Verdict and reasoning synthesized from research")
+
+
+# --------------------------------------------------------------------------
+# Motivation models
+# --------------------------------------------------------------------------
+
+
+class MotivationRequest(BaseModel):
+    """Request for a daily motivational message."""
+
+    context: str = Field(
+        default="", description="Optional context about the user's goals, mood, or current challenges"
+    )
+
+
+class MotivationResponse(BaseModel):
+    """A daily motivational message."""
+
+    message: str = Field(..., description="The generated motivational message")
+
+
+class HealthyHabitTipRequest(BaseModel):
+    """Request for a healthy habit tip."""
+
+    category: str = Field(
+        default="", description="Optional focus area for the tip, e.g. sleep, hydration, exercise, or stress"
+    )
+
+
+class HealthyHabitTipResponse(BaseModel):
+    """A healthy habit tip."""
+
+    tip: str = Field(..., description="The generated healthy habit tip")
