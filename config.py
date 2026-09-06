@@ -5,9 +5,8 @@ models and token-counting utilities.
 """
 
 import logging
-from functools import lru_cache
-
 import tiktoken
+from functools import lru_cache
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from strands.models.openai import OpenAIModel

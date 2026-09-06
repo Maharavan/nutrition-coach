@@ -1,18 +1,13 @@
 from pathlib import Path
-
-from strands.agent import Agent
-from config import nutrition_config
-from strands.memory import MemoryManager
-from api.models import AgentResponse
 import logging
 from functools import lru_cache
 
+from strands.agent import Agent
+from config import nutrition_config
+from api.models import AgentResponse
+
 logger = logging.getLogger(__name__)
 
-for _log in ["strands", "botocore", "boto3", "httpx", "urllib3",
-             "strands.agent", "strands.tools", "strands.event_loop",
-             "strands.models", "strands.experimental.bidi"]:
-    logging.getLogger(_log).setLevel(logging.CRITICAL)
 
 class NutritionAgent:
     """Class representing a nutrition agent that provides nutritional advice based on user input."""

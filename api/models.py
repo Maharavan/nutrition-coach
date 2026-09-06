@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 class UserMessage(BaseModel):
     """Model representing a user message."""
     user_id: str = Field(..., description="The unique identifier of the user", example="user_12345")
-    session_id: str = Field(..., description="The unique identifier of the session", example="session_67890")
+    conversation_id: str = Field(..., description="The unique identifier of the conversation", example="conv_67890")
     message: str = Field(..., description="The message content from the user")
     timestamp: str = Field(..., description="The timestamp when the message was sent")
 

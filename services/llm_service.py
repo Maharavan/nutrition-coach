@@ -1,11 +1,10 @@
 """"LLM service module for interacting with OpenAI models."""
-from typing import List
-
-from openai import OpenAI
-from openai import APIConnectionError,RateLimitError,AuthenticationError,BadRequestError
-from pydantic import BaseModel, Field
-import time
 import logging
+from typing import List
+import time
+
+from openai import OpenAI, APIConnectionError, RateLimitError, AuthenticationError, BadRequestError
+from pydantic import BaseModel, Field
 
 from config import nutrition_config
 
