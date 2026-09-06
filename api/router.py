@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from agent.nutrition_agent import get_nutrition_agent
-from api.models import UserMessage
+from api.models import AgentResponse, UserMessage
 
 router = APIRouter()
 
@@ -12,9 +12,9 @@ async def chat_with_ai(message: UserMessage):
 
     # Logic for handling chat interactions would go here
     try:
-        response = nutrition_agent.get_nutrition_advice(message.content)
-        return {"message": response.response}
+        response = nutrition_agent.get_nutrition_advice(message.message)
+        return AgentResponse(response=response.response)
     except HTTPException:
-        return {"message": "An error occurred while processing your request."}
+        return AgentResponse(response="An error occurred while processing your request.")
     except Exception as e:
-        return {"message": f"Unexpected error: {str(e)}"}
+        return AgentResponse(response=f"Unexpected error: {str(e)}")

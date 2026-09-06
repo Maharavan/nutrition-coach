@@ -1,12 +1,10 @@
 from strands.memory.types import MemoryEntry, SearchOptions,AddMessagesContext
 from mem0 import MemoryClient
 from config import nutrition_config
-class Mem0Store:
-    
 
+class Mem0Store:
     def __init__(self):
         self.client : MemoryClient = MemoryClient(api_key=nutrition_config.MEM0_API_KEY.get_secret_value())
-
 
     async def search(self, query: str, options: SearchOptions | None = None):
         results = self.client.search(query=query)
