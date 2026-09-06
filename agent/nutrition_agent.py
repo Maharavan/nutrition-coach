@@ -5,6 +5,7 @@ from config import nutrition_config
 from strands.memory import MemoryManager
 from api.models import AgentResponse
 import logging
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -53,3 +54,8 @@ class NutritionAgent:
             self.agent.model = nutrition_config.get_fallback_model()
             response = self.agent(user_input)
         return AgentResponse(response=str(response))
+
+@lru_cache(maxsize=1)
+def get_nutrition_agent() -> NutritionAgent:
+    """Get a cached instance of the NutritionAgent."""
+    return NutritionAgent()
