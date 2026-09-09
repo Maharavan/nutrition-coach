@@ -9,7 +9,6 @@ router = APIRouter()
 
 
 
-nutrition_agent = get_nutrition_agent()
 
 
 @router.post("/chat")
@@ -25,6 +24,7 @@ async def chat_with_ai(message: UserMessage) -> AgentResponse:
     """
     try:
         logger.info(f"Processing chat request from user {message.user_id}")
+        nutrition_agent = get_nutrition_agent(user_id=message.user_id)
         logger.debug(f"Message: {message.message[:100]}...")  # Log first 100 chars
         
         response = nutrition_agent.get_nutrition_advice(message.message)

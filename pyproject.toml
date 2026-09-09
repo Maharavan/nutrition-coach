@@ -13,4 +13,5 @@ dependencies = [
     "mem0ai>=0.1.0",
     "tiktoken>=0.13.0",
     "uvicorn>=0.51.0",
+    "strands-agents-tools>=0.8.8",
 ]

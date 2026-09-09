@@ -11,10 +11,13 @@ logger = logging.getLogger(__name__)
 
 class NutritionAgent:
     """Class representing a nutrition agent that provides nutritional advice based on user input."""
-    def __init__(self):
+    def __init__(self, user_id: str):
         self.prompt = self.__import_prompt()
+        self.mem0_store = get_mem0_store()
+        self.memory_manager = self.mem0_store.get_memory_manager(user_id=user_id)
         self.agent = Agent(
             system_prompt=self.prompt,
+            memory_manager=self.memory_manager,
             model=nutrition_config.get_primary_model(),
             load_tools_from_directory=True
         )
@@ -50,7 +53,6 @@ class NutritionAgent:
             response = self.agent(user_input)
         return AgentResponse(response=str(response))
 
-@lru_cache(maxsize=1)
-def get_nutrition_agent() -> NutritionAgent:
+def get_nutrition_agent(user_id: str) -> NutritionAgent:
     """Get a cached instance of the NutritionAgent."""
-    return NutritionAgent()
+    return NutritionAgent(user_id=user_id)
