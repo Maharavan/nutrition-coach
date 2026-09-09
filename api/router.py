@@ -1,10 +1,10 @@
-import logging
 from fastapi import APIRouter, HTTPException, status
 
 from agent.nutrition_agent import get_nutrition_agent
 from api.models import AgentResponse, UserMessage
+from logger_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 
