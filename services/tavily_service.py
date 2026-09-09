@@ -24,10 +24,20 @@ class TavilyService():
 
     def __init__(self):
         """Initialize the TavilyService with a Tavily client."""
-        self._client = TavilyClient(api_key=nutrition_config.TAVILY_API_KEY.get_secret_value())
+        self._client = None
+        try:
+            self._client = TavilyClient(api_key=nutrition_config.get_tavily_api_key())
+        except ValueError:
+            logger.warning(
+                "Tavily API key is not configured. Search calls will return no results until TAVILY_API_KEY is set."
+            )
 
     def search(self, query: str, max_results: int = 5) -> TavilySearchResponse:
         """Search Tavily for the given query and return a formatted context string."""
+        if self._client is None:
+            logger.warning("Tavily search skipped because the API key is missing.")
+            return TavilySearchResponse(query=query, results="")
+
         try:
             response = self._client.search(query=query, max_results=max_results)
             search_results = [

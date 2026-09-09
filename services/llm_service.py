@@ -21,7 +21,13 @@ class LLMResponse(BaseModel):
 class LLMService:
     """Service class to interact with OpenAI's language models."""
     def __init__(self, models:List[str] | None = None):
-        self.client = OpenAI(api_key=nutrition_config.API_KEY.get_secret_value())
+        self.client = None
+        try:
+            self.client = OpenAI(api_key=nutrition_config.get_api_key())
+        except ValueError:
+            logger.warning(
+                "OpenAI API key is not configured. LLM calls will fail until API_KEY is set in the environment."
+            )
         self.models = models or [nutrition_config.TOOL_MODEL_NAME, nutrition_config.TOOL_FALLBACK_MODEL_NAME]
 
         self._check_model_instance(self.models)
@@ -41,6 +47,11 @@ class LLMService:
     
     def _generate_response(self, user_prompt: str, system_prompt: str, model_name: str) -> LLMResponse:
         """Generate a response based on the provided prompt."""
+        if self.client is None:
+            raise RuntimeError(
+                "OpenAI client is unavailable because API_KEY is not configured. Add the key to your .env file."
+            )
+
         response = self.client.chat.completions.create(
             model=model_name,
             messages=[

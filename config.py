@@ -39,8 +39,8 @@ class NutritionAgentConfig(BaseSettings):
     """Settings and helpers for the nutrition agent's API models."""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
-    MEM0_API_KEY: SecretStr
-    API_KEY: SecretStr
+    MEM0_API_KEY: SecretStr | None = None
+    API_KEY: SecretStr | None = None
     AGENT_MODEL_NAME: str = Field(
         default="gpt-4o",
         description="Primary model used for responses",
@@ -59,7 +59,7 @@ class NutritionAgentConfig(BaseSettings):
             "Lower values make output more deterministic."
         ),
     )
-    TAVILY_API_KEY: SecretStr
+    TAVILY_API_KEY: SecretStr | None = None
     TOOL_MODEL_NAME: str = Field(
         default="gpt-4o",
         description="Primary model used for responses",
@@ -69,10 +69,32 @@ class NutritionAgentConfig(BaseSettings):
         description="Fallback model used if primary fails",
     )
 
+    @staticmethod
+    def _get_secret_value(key_name: str, value: SecretStr | None) -> str:
+        """Return a configured secret value or raise a clear error."""
+        if value is None:
+            raise ValueError(f"{key_name} is not set. Add it to your .env file or environment.")
+        secret_value = value.get_secret_value().strip()
+        if not secret_value:
+            raise ValueError(f"{key_name} is empty. Add a valid value to your .env file or environment.")
+        return secret_value
+
+    def get_api_key(self) -> str:
+        """Return the configured OpenAI API key."""
+        return self._get_secret_value("API_KEY", self.API_KEY)
+
+    def get_mem0_api_key(self) -> str:
+        """Return the configured Mem0 API key."""
+        return self._get_secret_value("MEM0_API_KEY", self.MEM0_API_KEY)
+
+    def get_tavily_api_key(self) -> str:
+        """Return the configured Tavily API key."""
+        return self._get_secret_value("TAVILY_API_KEY", self.TAVILY_API_KEY)
+
     def create_model(self, model_name: str) -> OpenAIModel:
         """Create an OpenAIModel instance with the given model name."""
         return OpenAIModel(
-            client_args={"api_key": self.API_KEY.get_secret_value()},
+            client_args={"api_key": self.get_api_key()},
             model_id=model_name,
             params={
                 "temperature": self.AGENT_TEMPERATURE,

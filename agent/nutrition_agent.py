@@ -5,7 +5,7 @@ from functools import lru_cache
 from strands.agent import Agent
 from config import nutrition_config
 from api.models import AgentResponse
-
+from agent.mem0_store import get_mem0_store 
 logger = logging.getLogger(__name__)
 
 
